@@ -1,4 +1,3 @@
-from collections import defaultdict
 import random
 import string
 import re
@@ -16,6 +15,7 @@ class Hangman:
         self.correct_word_list = ['_'] * len(self.target_word)
 
     def play(self):
+        print("Welcome to Hangman!!")
         while not self.game_over():
             self.draw_hangman(self.wrong_guesses)
             if len(self.correct_guess) == 0:
@@ -44,7 +44,8 @@ class Hangman:
         print(f"Your word was: {self.target_word}")
     
     def build_word(self, player_guess):
-        letter_index = self.find_letter(player_guess)
+        letter_index = self.find_letter(player_guess, self.target_word)
+
         if len(letter_index) > 0:
             for i in letter_index:
                 self.correct_word_list[int(i)] = player_guess
@@ -52,8 +53,8 @@ class Hangman:
 
         return correct_word
     
-    def find_letter(self, player_guess):
-        matches = re.finditer(player_guess, self.target_word)
+    def find_letter(self, player_guess, target_word):
+        matches = re.finditer(player_guess, target_word)
         indexes = []
         for match in matches:
             indexes.append(match.start())
@@ -159,9 +160,9 @@ class Hangman:
         if hint_type == 'length':
             return (f"The word is: {len(target_word)} characters.")
         elif hint_type == 'first_letter':
-            return (f"The first letter of the word is: {target_word.charAt(0)}")
+            return (f"The first letter of the word is: {target_word[0]}")
         elif hint_type == 'last_letter':
-            return (f"The last letter of the word is: {target_word[:-1]}")
+            return (f"The last letter of the word is: {target_word[-1]}")
         else:
             return "Invalid hint type! Available hints:(Word Length(l), First Letter(fl) & Last Letter(ll))"
         
