@@ -5,6 +5,7 @@ import re
 class Hangman:
     def __init__(self) -> None:
         self.MAX_INCORRECT_GUESSES = 6
+        self.hints_remaining = 2
         self.word_list = set(
             word.strip() for word in open("words.txt", mode="r")
             )
@@ -33,6 +34,7 @@ class Hangman:
             else:
                 print("Oops, incorrect guess")
                 self.wrong_guesses += 1
+                
             self.guessed_letters.add(player_guess)
 
         self.draw_hangman(self.wrong_guesses)
@@ -144,10 +146,24 @@ class Hangman:
 
     def get_player_input(self):
         while True:
-            player_input = input("Guess a letter: ").lower()
+            player_input = input("Guess a letter or type 'hint' for a hint: ").lower()
+
+            if player_input == "hint":
+                # Check if hints are still available
+                if self.hints_remaining <= 0:
+                    print("You have no hints remaining.")
+                    continue
+
+                # Get and display a hint
+                self.get_hint()
+                continue
+
+            # Validate input as usual
             if self.validate_input(player_input):
                 return player_input
-            print("Invalid guess. Please enter a single lowercase letter that you haven't guessed before.")
+
+            print("Invalid input. Please enter a single lowercase letter that you haven't guessed before, or type 'hint' for a hint.")
+
 
     def validate_input(self, player_input):
         return (
@@ -156,15 +172,17 @@ class Hangman:
             and player_input not in self.guessed_letters
         )
     
-    def provide_hint(self, target_word, hint_type):
-        if hint_type == 'length':
-            return (f"The word is: {len(target_word)} characters.")
-        elif hint_type == 'first_letter':
-            return (f"The first letter of the word is: {target_word[0]}")
-        elif hint_type == 'last_letter':
-            return (f"The last letter of the word is: {target_word[-1]}")
-        else:
-            return "Invalid hint type! Available hints:(Word Length(l), First Letter(fl) & Last Letter(ll))"
+    def get_hint(self):
+       
+       if self.hints_remaining <= 0:
+           print("You have no hints remaining.")
+           return
+       
+       hint_letter = random.choice(list(set(self.target_word) - self.guessed_letters))
+       self.hints_remaining -= 1
+
+       print(f"Hint: The letter '{hint_letter}' is in the word.")
+
         
 
     def select_difficulty(self):

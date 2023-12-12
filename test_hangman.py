@@ -17,10 +17,27 @@ class TestHangman(unittest.TestCase):
         self.assertFalse(self.game.validate_input('1'))
         self.assertFalse(self.game.validate_input('ab'))
 
-    @patch('builtins.input', return_value='a')
-    def test_get_player_input(self, mock_input):
+    @patch('builtins.input', side_effect=['hint', 'a'])
+    @patch('builtins.print')
+    def test_get_player_input_hint_no_hints_remaining(self, mock_print, mock_input):
+        self.game.hints_remaining = 0
         self.assertEqual(self.game.get_player_input(), 'a')
+        mock_print.assert_called_with("You have no hints remaining.")
 
+    @patch('builtins.input', side_effect=['hint', 'a'])
+    @patch('builtins.print')
+    def test_get_player_input_hint_with_hints_remaining(self, mock_print, mock_input):
+        self.game.hints_remaining = 1
+        self.game.target_word = 'apple'
+        self.assertEqual(self.game.get_player_input(), 'a')
+        mock_print.assert_called_with("Hint: The letter 'e' is in the word.")
+
+    @patch('builtins.input', side_effect=['1', 'a'])
+    @patch('builtins.print')
+    def test_get_player_input_invalid_input(self, mock_print, mock_input):
+        self.assertEqual(self.game.get_player_input(), 'a')
+        mock_print.assert_called_with("Invalid input. Please enter a single lowercase letter that you haven't guessed before, or type 'hint' for a hint.")
+    
     def test_game_over(self):
         self.game.wrong_guesses = self.game.MAX_INCORRECT_GUESSES
         self.assertTrue(self.game.game_over())
@@ -39,11 +56,22 @@ class TestHangman(unittest.TestCase):
         self.assertEqual(self.game.build_word('a'), 'a____')
         self.assertEqual(self.game.build_word('p'), 'app__')
 
-    def test_provide_hint(self):
+    @patch('builtins.print')
+    @patch('random.choice', return_value='a')
+    def test_get_hint_no_hints_remaining(self, mock_choice, mock_print):
+        self.game.hints_remaining = 0
+        self.game.get_hint()
+        mock_print.assert_called_once_with("You have no hints remaining.")
+
+    @patch('builtins.print')
+    @patch('random.choice', return_value='a')
+    def test_get_hint_with_hints_remaining(self, mock_choice, mock_print):
         self.game.target_word = 'apple'
-        self.assertEqual(self.game.provide_hint(self.game.target_word, 'length'), 'The word is: 5 characters.')
-        self.assertEqual(self.game.provide_hint(self.game.target_word, 'first_letter'), 'The first letter of the word is: a')
-        self.assertEqual(self.game.provide_hint(self.game.target_word, 'last_letter'), 'The last letter of the word is: e')
+        self.game.hints_remaining = 1
+        self.game.get_hint()
+        mock_print.assert_called_once_with("Hint: The letter 'a' is in the word.")
+        self.assertEqual(self.game.hints_remaining, 0)
+        
 
 if __name__ == '__main__':
     unittest.main()
