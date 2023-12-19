@@ -13,10 +13,23 @@ class Hangman:
         self.guessed_letters = set()
         self.correct_guess = ""
         self.wrong_guesses = 0
-        self.correct_word_list = ['_'] * len(self.target_word)
+        self.correct_word_list = ['_'] * len(self.target_word) 
+        self.difficulty = 'e' # easy(e), medium(m), hard(h)
 
     def play(self):
         print("Welcome to Hangman!!")
+        print("Select a difficulty level: 'e' for easy, 'm' for medium, 'h' for hard ")
+        valid_options = ['e', 'm', 'h']
+        choice = input("Enter your choice: ").lower()
+
+        while choice not in valid_options:
+            print("Invalid choice. Please try again.")
+            choice = input("Enter your choice: ").lower()
+
+        # Now you can use the chosen option
+        self.difficulty = choice
+        self.select_difficulty(self.difficulty)
+        
         while not self.game_over():
             self.draw_hangman(self.wrong_guesses)
             if len(self.correct_guess) == 0:
@@ -33,7 +46,12 @@ class Hangman:
                 print("Great guess!")
             else:
                 print("Oops, incorrect guess")
-                self.wrong_guesses += 1
+                if self.difficulty == 'm':
+                    self.wrong_guesses += 2
+                elif self.difficulty == 'h':
+                    self.wrong_guesses += 3
+                else:
+                    self.wrong_guesses += 1
                 
             self.guessed_letters.add(player_guess)
 
@@ -185,7 +203,22 @@ class Hangman:
 
         
 
-    def select_difficulty(self):
+    def select_difficulty(self, difficulty):
+        
+        # easy(e), medium(m), hard(h)
+        if difficulty == 'e':
+            self.MAX_INCORRECT_GUESSES = 6
+        elif difficulty == 'm':
+            self.MAX_INCORRECT_GUESSES = 4
+            self.hints_remaining = 1
+        elif difficulty == 'h':
+            self.MAX_INCORRECT_GUESSES = 2
+            self.hints_remaining = 0
+
+    def calculate_points(self):
+        pass
+
+    def show_leaderboard(self):
         pass
 
 if __name__ == "__main__":
